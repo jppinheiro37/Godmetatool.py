@@ -46,7 +46,7 @@ def search_dork(engine_url, query, pages=5, ext_filter=None):
 
 def download_file(link, session_dir):
     filename = os.path.join(session_dir, os.path.basename(link))
-    print(f"[DOWNLOAD] Baixando: {link}")
+    print(f"[DOWNLOAD] Downloading: {link}")
     os.system(f"wget -q --timeout=15 --tries=2 '{link}' -O '{filename}'")
     return filename
 
@@ -69,16 +69,16 @@ def extract_metadata_summary(file_path):
 
 def download_and_metadata(links, session_dir):
     os.makedirs(session_dir, exist_ok=True)
-    report_csv = os.path.join(session_dir, "metadados_relatorio.csv")
-    report_html = os.path.join(session_dir, "metadados_relatorio.html")
+    report_csv = os.path.join(session_dir, "metadata_report.csv")
+    report_html = os.path.join(session_dir, "metadata_report.html")
 
     with open(report_csv, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Arquivo','Autor','Título','Data'])
+        writer.writerow(['File','Author','Title','Date'])
 
     with open(report_html, 'w', encoding='utf-8') as htmlfile:
-        htmlfile.write('<html><head><title>Relatório</title></head><body><h1>Metadados</h1><table border=1>')
-        htmlfile.write('<tr><th>Arquivo</th><th>Autor</th><th>Título</th><th>Data</th></tr>')
+        htmlfile.write('<html><head><title>Report</title></head><body><h1>Metadata</h1><table border=1>')
+        htmlfile.write('<tr><th>File</th><th>Author</th><th>Title</th><th>Date</th></tr>')
 
     metadata_list = []
 
@@ -104,19 +104,19 @@ def download_and_metadata(links, session_dir):
 # Execution
 # =============================
 
-bulk_mode = input("Deseja usar lista de sites? (s/n): ")
+bulk_mode = input("Do you want to use a list of sites? (y/n): ")
 sites = []
-if bulk_mode == 's':
-    lista = input("Digite o caminho do arquivo com lista de sites: ")
+if bulk_mode == 'y':
+    lista = input("Enter the path to the file with the list of sites: ")
     with open(lista, 'r') as f:
         sites = [line.strip() for line in f if line.strip()]
 else:
-    site = input("Digite o site alvo (ex: exemplo.com): ")
+    site = input("Enter the target site (e.g., example.com): ")
     sites = [site]
 
-ext_choice = input("Digite a extensão desejada (ex: pdf, docx) ou pressione Enter para todas: ")
-mode_aggressive = input("Modo agressivo (20 páginas)? (s/n): ")
-pages = 20 if mode_aggressive == 's' else 5
+ext_choice = input("Enter the desired extension (e.g., pdf, docx) or press Enter for all: ")
+mode_aggressive = input("Aggressive mode (20 pages)? (y/n): ")
+pages = 20 if mode_aggressive == 'y' else 5
 
 engines = {
     'Google': 'https://www.google.com/search?q={query}&start={start}',
@@ -130,27 +130,26 @@ all_links = []
 for site in sites:
     dork = f"site:{site} filetype:{ext_choice}" if ext_choice else f"site:{site} filetype:pdf OR filetype:doc OR filetype:docx"
     for name, url in engines.items():
-        print(f"Buscando em {name} para {site}...")
+        print(f"Searching on {name} for {site}...")
         links = search_dork(url, dork, pages=pages, ext_filter=f".{ext_choice}" if ext_choice else None)
         all_links.extend(links)
 
 all_links = list(set(all_links))
-print(f"Encontrados {len(all_links)} arquivos.")
+print(f"Found {len(all_links)} files.")
 
 session_dir = f"downloads/session_{int(time.time())}"
 metadata_files = download_and_metadata(all_links, session_dir)
-print(f"Relatórios salvos em {session_dir}")
+print(f"Reports saved in {session_dir}")
 
-# Pergunta para exibir metadados completos no terminal
-show_meta = input("Exibir metadados completos do que foi encontrado? (s/n): ")
-if show_meta.lower() == 's':
-    print("\n=== Metadados completos dos arquivos baixados ===")
+show_meta = input("Show full metadata of downloaded files? (y/n): ")
+if show_meta.lower() == 'y':
+    print("\n=== Full metadata of downloaded files ===")
     for file_path in metadata_files:
-        print(f"\nArquivo: {file_path}\n")
+        print(f"\nFile: {file_path}\n")
         try:
             output = subprocess.check_output(['exiftool', file_path], text=True)
             print(output)
         except:
-            print("[ERRO] Não foi possível ler metadados.")
+            print("[ERROR] Could not read metadata.")
 
 driver.quit()
