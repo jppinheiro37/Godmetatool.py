@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 # =============================
-# GodMetaTool v6 - Exibir metadados completos no terminal
+# GodMetaTool 
 # =============================
 
 # Configurações do Selenium
@@ -26,7 +26,6 @@ options.add_argument('user-agent=Mozilla/5.0')
 
 driver = webdriver.Chrome(options=options)
 
-# Função para buscar dorks em um motor
 def search_dork(engine_url, query, pages=5, ext_filter=None):
     links = []
     for page in range(pages):
@@ -45,14 +44,14 @@ def search_dork(engine_url, query, pages=5, ext_filter=None):
                         links.append(href)
     return list(set(links))
 
-# Função para baixar arquivos com timeout e tentativas limitadas
+
 def download_file(link, session_dir):
     filename = os.path.join(session_dir, os.path.basename(link))
     print(f"[DOWNLOAD] Baixando: {link}")
     os.system(f"wget -q --timeout=15 --tries=2 '{link}' -O '{filename}'")
     return filename
 
-# Função para extrair metadados resumidos (para relatórios)
+
 def extract_metadata_summary(file_path):
     autor = titulo = data = ''
     try:
@@ -68,7 +67,7 @@ def extract_metadata_summary(file_path):
         pass
     return autor, titulo, data
 
-# Função para baixar e processar metadados em paralelo
+
 def download_and_metadata(links, session_dir):
     os.makedirs(session_dir, exist_ok=True)
     report_csv = os.path.join(session_dir, "metadados_relatorio.csv")
@@ -103,7 +102,7 @@ def download_and_metadata(links, session_dir):
     return metadata_list
 
 # =============================
-# Execução principal
+# Execution
 # =============================
 
 bulk_mode = input("Deseja usar lista de sites? (s/n): ")
